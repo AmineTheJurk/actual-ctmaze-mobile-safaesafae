@@ -397,6 +397,9 @@ const Multiplayer = (() => {
 
   function executeCatch(targetId, targetRec) {
     if (myRole === 'thief' || S.downed) return;
+    // Only catch thieves, not other monsters
+    if (targetRec.role !== 'thief') return;
+
     send({ type: 'thief_caught', targetId, hunterRole: myRole });
     targetRec.downed = true;
     const sound = myRole === 'hurter' ? 'hurterboy_stabbed' : (myRole === 'puppet' ? 'puppet_exploded' : 'nazer');

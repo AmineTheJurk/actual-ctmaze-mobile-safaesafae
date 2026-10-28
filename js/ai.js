@@ -73,10 +73,11 @@ const AI = {
           if (S.inv.includes(null)) { k.taken = true; k.sp.visible = false; Events.openBox(); }
           else if (!k.warned || S.time - k.warned > 2) { k.warned = S.time; Game.toast('Inventory full'); }
         } else if (k.type === 'corn') {
+          k.taken = true; k.sp.visible = false;
           if (typeof Multiplayer !== 'undefined' && Multiplayer.inMultiplayer) {
             Multiplayer.tryPickupCorn(AI.pickups.indexOf(k));
           } else {
-            k.taken = true; k.sp.visible = false; S.corns++; Snd.play('corn');
+            S.corns++; Snd.play('corn');
             Game.toast(`Corn ${S.corns}/${CORNS}`);
             if (S.corns >= CORNS) Game.allCorns();
           }
