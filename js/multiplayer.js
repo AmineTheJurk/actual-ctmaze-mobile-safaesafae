@@ -622,6 +622,32 @@ const Multiplayer = (() => {
     World.setSeed(msg.seed);
     Game.newGame(msg.seed);
 
+    // Check if any player is a thief - if not, spawn AI thief for monsters to hunt
+    const hasThief = msg.players && msg.players.some(p => p.role === 'thief');
+    if (!hasThief) {
+      // Spawn AI thief at start position
+      const thiefRec = {
+        id: 'ai_thief',
+        name: 'CPU Thief',
+        role: 'thief',
+        x: 0,
+        z: 0,
+        currentX: 0,
+        currentZ: 0,
+        yaw: 0,
+        pitch: 0,
+        downed: false,
+        vent: false,
+        group: new THREE.Group(),
+        sp: new THREE.Sprite()
+      };
+      thiefRec.sp.position.set(0, 2, 0);
+      thiefRec.group.add(thiefRec.sp);
+      G.scene.add(thiefRec.group);
+      remotePlayers.set('ai_thief', thiefRec);
+      Game.toast('⚠️ No thief player! AI Thief spawned for you to hunt!');
+    }
+
     if (myRole !== 'thief') {
       const roleInfo = ROLES[myRole] || ROLES.nazer;
       Game.toast(`You are ${roleInfo.name.toUpperCase()}! You have the FULL MAP. Catch the thieves!`);
