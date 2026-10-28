@@ -69,6 +69,8 @@ const TouchControls = (() => {
 
       btn.addEventListener('touchstart', (e) => {
         e.preventDefault();
+        e.stopPropagation();
+        isDragging = false;
         simulateKeyDown(keyCode);
         btn.style.background = 'rgba(200, 26, 26, 1)';
         btn.style.transform = 'scale(0.95)';
@@ -76,14 +78,22 @@ const TouchControls = (() => {
 
       btn.addEventListener('touchend', (e) => {
         e.preventDefault();
+        e.stopPropagation();
         simulateKeyUp(keyCode);
         btn.style.background = 'rgba(200, 26, 26, 0.85)';
         btn.style.transform = 'scale(1)';
       });
 
+      btn.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      });
+
       // Mouse support for testing
       btn.addEventListener('mousedown', (e) => {
         e.preventDefault();
+        e.stopPropagation();
+        isDragging = false;
         simulateKeyDown(keyCode);
         btn.style.background = 'rgba(200, 26, 26, 1)';
         btn.style.transform = 'scale(0.95)';
@@ -91,9 +101,15 @@ const TouchControls = (() => {
 
       btn.addEventListener('mouseup', (e) => {
         e.preventDefault();
+        e.stopPropagation();
         simulateKeyUp(keyCode);
         btn.style.background = 'rgba(200, 26, 26, 0.85)';
         btn.style.transform = 'scale(1)';
+      });
+
+      btn.addEventListener('mousemove', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
       });
     });
 
@@ -101,13 +117,18 @@ const TouchControls = (() => {
     const lookBox = document.getElementById('lookBox');
     if (lookBox) {
       lookBox.addEventListener('touchstart', (e) => {
+        const target = e.target;
+        if (target && (target.classList.contains('dpad-btn') || target.classList.contains('action-btn'))) {
+          return;
+        }
+
         if (e.touches.length > 0) {
           const touch = e.touches[0];
           lastLookX = touch.clientX;
           lastLookY = touch.clientY;
           isDragging = true;
         }
-      });
+      }, { passive: false });
 
       lookBox.addEventListener('touchmove', (e) => {
         if (!isDragging || e.touches.length === 0) return;
@@ -124,14 +145,23 @@ const TouchControls = (() => {
 
         lastLookX = touch.clientX;
         lastLookY = touch.clientY;
-      });
+      }, { passive: false });
 
       lookBox.addEventListener('touchend', (e) => {
         isDragging = false;
-      });
+      }, { passive: true });
+
+      lookBox.addEventListener('touchcancel', (e) => {
+        isDragging = false;
+      }, { passive: true });
 
       // Mouse support for testing
       lookBox.addEventListener('mousedown', (e) => {
+        const target = e.target;
+        if (target && (target.classList.contains('dpad-btn') || target.classList.contains('action-btn'))) {
+          return;
+        }
+
         if (e.button === 0) {
           lastLookX = e.clientX;
           lastLookY = e.clientY;
