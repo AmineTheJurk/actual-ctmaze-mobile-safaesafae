@@ -2,6 +2,8 @@
 const TouchControls = (() => {
   let isEnabled = false;
   const touches = {};
+  let lastLookX = 0, lastLookY = 0;
+  let isDragging = false;
 
   function init() {
     if (isEnabled) return;
@@ -34,25 +36,25 @@ const TouchControls = (() => {
       <div style="position: fixed; inset: 0; pointer-events: auto; z-index: 1;" id="lookBox"></div>
     `;
 
-    // D-Pad (left side - FIXED LAYOUT)
+    // D-Pad (left side - compact cross layout)
     const dpad = `
-      <div style="position: fixed; left: 16px; bottom: calc(150px + env(safe-area-inset-bottom, 0px)); width: 120px; height: 120px; pointer-events: auto; z-index: 10;">
-        <button class="dpad-btn dpad-up" data-key="KeyW" style="position: absolute; left: 20px; top: 0; width: 50px; height: 40px; background: rgba(200, 26, 26, 0.8); border: 2px solid #f2c230; color: #f2c230; font-weight: bold; cursor: pointer; border-radius: 4px; font-size: 20px;">↑</button>
-        <button class="dpad-btn dpad-left" data-key="KeyA" style="position: absolute; left: 0; top: 50px; width: 50px; height: 40px; background: rgba(200, 26, 26, 0.8); border: 2px solid #f2c230; color: #f2c230; font-weight: bold; cursor: pointer; border-radius: 4px; font-size: 20px;">←</button>
-        <button class="dpad-btn dpad-down" data-key="KeyS" style="position: absolute; left: 20px; top: 80px; width: 50px; height: 40px; background: rgba(200, 26, 26, 0.8); border: 2px solid #f2c230; color: #f2c230; font-weight: bold; cursor: pointer; border-radius: 4px; font-size: 20px;">↓</button>
-        <button class="dpad-btn dpad-right" data-key="KeyD" style="position: absolute; left: 70px; top: 50px; width: 50px; height: 40px; background: rgba(200, 26, 26, 0.8); border: 2px solid #f2c230; color: #f2c230; font-weight: bold; cursor: pointer; border-radius: 4px; font-size: 20px;">→</button>
+      <div style="position: fixed; left: 12px; bottom: calc(145px + env(safe-area-inset-bottom, 0px)); pointer-events: auto; z-index: 10;">
+        <button class="dpad-btn dpad-up" data-key="KeyW" style="position: absolute; left: 16px; top: 0; width: 38px; height: 38px; background: rgba(200, 26, 26, 0.85); border: 2px solid #f2c230; color: #f2c230; font-weight: bold; cursor: pointer; border-radius: 3px; font-size: 18px;">↑</button>
+        <button class="dpad-btn dpad-left" data-key="KeyA" style="position: absolute; left: 0; top: 44px; width: 38px; height: 38px; background: rgba(200, 26, 26, 0.85); border: 2px solid #f2c230; color: #f2c230; font-weight: bold; cursor: pointer; border-radius: 3px; font-size: 18px;">←</button>
+        <button class="dpad-btn dpad-down" data-key="KeyS" style="position: absolute; left: 16px; top: 88px; width: 38px; height: 38px; background: rgba(200, 26, 26, 0.85); border: 2px solid #f2c230; color: #f2c230; font-weight: bold; cursor: pointer; border-radius: 3px; font-size: 18px;">↓</button>
+        <button class="dpad-btn dpad-right" data-key="KeyD" style="position: absolute; left: 60px; top: 44px; width: 38px; height: 38px; background: rgba(200, 26, 26, 0.85); border: 2px solid #f2c230; color: #f2c230; font-weight: bold; cursor: pointer; border-radius: 3px; font-size: 18px;">→</button>
       </div>
     `;
 
-    // Action Buttons (right side)
+    // Action Buttons (right side - 2x3 grid)
     const actions = `
-      <div style="position: fixed; right: 16px; bottom: calc(150px + env(safe-area-inset-bottom, 0px)); width: 220px; pointer-events: auto; z-index: 10;">
-        <button class="action-btn" data-key="KeyQ" style="position: absolute; right: 120px; bottom: 65px; width: 50px; height: 50px; background: rgba(200, 26, 26, 0.8); border: 2px solid #f2c230; color: #f2c230; font-weight: bold; cursor: pointer; border-radius: 4px; font-size: 20px;">Q</button>
-        <button class="action-btn" data-key="Space" style="position: absolute; right: 60px; bottom: 65px; width: 50px; height: 50px; background: rgba(200, 26, 26, 0.8); border: 2px solid #f2c230; color: #f2c230; font-weight: bold; cursor: pointer; border-radius: 4px; font-size: 18px;">⚔</button>
-        <button class="action-btn" data-key="ShiftLeft" style="position: absolute; right: 0; bottom: 65px; width: 50px; height: 50px; background: rgba(200, 26, 26, 0.8); border: 2px solid #f2c230; color: #f2c230; font-weight: bold; cursor: pointer; border-radius: 4px; font-size: 14px;">RUN</button>
-        <button class="action-btn" data-key="KeyE" style="position: absolute; right: 120px; bottom: 5px; width: 50px; height: 50px; background: rgba(200, 26, 26, 0.8); border: 2px solid #f2c230; color: #f2c230; font-weight: bold; cursor: pointer; border-radius: 4px; font-size: 20px;">E</button>
-        <button class="action-btn" data-key="KeyV" style="position: absolute; right: 60px; bottom: 5px; width: 50px; height: 50px; background: rgba(200, 26, 26, 0.8); border: 2px solid #f2c230; color: #f2c230; font-weight: bold; cursor: pointer; border-radius: 4px; font-size: 14px;">VENT</button>
-        <button class="action-btn" data-key="KeyM" style="position: absolute; right: 0; bottom: 5px; width: 50px; height: 50px; background: rgba(200, 26, 26, 0.8); border: 2px solid #f2c230; color: #f2c230; font-weight: bold; cursor: pointer; border-radius: 4px; font-size: 16px;">MAP</button>
+      <div style="position: fixed; right: 12px; bottom: calc(145px + env(safe-area-inset-bottom, 0px)); pointer-events: auto; z-index: 10;">
+        <button class="action-btn" data-key="KeyQ" style="position: absolute; right: 84px; bottom: 48px; width: 40px; height: 40px; background: rgba(200, 26, 26, 0.85); border: 2px solid #f2c230; color: #f2c230; font-weight: bold; cursor: pointer; border-radius: 3px; font-size: 16px;">Q</button>
+        <button class="action-btn" data-key="Space" style="position: absolute; right: 42px; bottom: 48px; width: 40px; height: 40px; background: rgba(200, 26, 26, 0.85); border: 2px solid #f2c230; color: #f2c230; font-weight: bold; cursor: pointer; border-radius: 3px; font-size: 16px;">⚔</button>
+        <button class="action-btn" data-key="ShiftLeft" style="position: absolute; right: 0; bottom: 48px; width: 40px; height: 40px; background: rgba(200, 26, 26, 0.85); border: 2px solid #f2c230; color: #f2c230; font-weight: bold; cursor: pointer; border-radius: 3px; font-size: 12px;">RUN</button>
+        <button class="action-btn" data-key="KeyE" style="position: absolute; right: 84px; bottom: 0; width: 40px; height: 40px; background: rgba(200, 26, 26, 0.85); border: 2px solid #f2c230; color: #f2c230; font-weight: bold; cursor: pointer; border-radius: 3px; font-size: 16px;">E</button>
+        <button class="action-btn" data-key="KeyV" style="position: absolute; right: 42px; bottom: 0; width: 40px; height: 40px; background: rgba(200, 26, 26, 0.85); border: 2px solid #f2c230; color: #f2c230; font-weight: bold; cursor: pointer; border-radius: 3px; font-size: 12px;">V</button>
+        <button class="action-btn" data-key="KeyM" style="position: absolute; right: 0; bottom: 0; width: 40px; height: 40px; background: rgba(200, 26, 26, 0.85); border: 2px solid #f2c230; color: #f2c230; font-weight: bold; cursor: pointer; border-radius: 3px; font-size: 14px;">M</button>
       </div>
     `;
 
@@ -75,7 +77,7 @@ const TouchControls = (() => {
       btn.addEventListener('touchend', (e) => {
         e.preventDefault();
         simulateKeyUp(keyCode);
-        btn.style.background = 'rgba(200, 26, 26, 0.7)';
+        btn.style.background = 'rgba(200, 26, 26, 0.85)';
         btn.style.transform = 'scale(1)';
       });
 
@@ -90,7 +92,7 @@ const TouchControls = (() => {
       btn.addEventListener('mouseup', (e) => {
         e.preventDefault();
         simulateKeyUp(keyCode);
-        btn.style.background = 'rgba(200, 26, 26, 0.7)';
+        btn.style.background = 'rgba(200, 26, 26, 0.85)';
         btn.style.transform = 'scale(1)';
       });
     });
@@ -98,40 +100,66 @@ const TouchControls = (() => {
     // Look box for camera control
     const lookBox = document.getElementById('lookBox');
     if (lookBox) {
-      let lastX = 0, lastY = 0;
+      lookBox.addEventListener('touchstart', (e) => {
+        if (e.touches.length > 0) {
+          const touch = e.touches[0];
+          lastLookX = touch.clientX;
+          lastLookY = touch.clientY;
+          isDragging = true;
+        }
+      });
 
       lookBox.addEventListener('touchmove', (e) => {
+        if (!isDragging || e.touches.length === 0) return;
         e.preventDefault();
+
         const touch = e.touches[0];
-        const rect = lookBox.getBoundingClientRect();
-        const x = touch.clientX - rect.left;
-        const y = touch.clientY - rect.top;
-        const dx = (x - lastX) * 0.003;
-        const dy = (y - lastY) * 0.003;
+        const dx = (touch.clientX - lastLookX) * 0.003;
+        const dy = (touch.clientY - lastLookY) * 0.003;
 
         if (G && G.p) {
           G.p.yaw -= dx;
           G.p.pitch = Math.max(-1.2, Math.min(1.2, G.p.pitch - dy));
         }
-        lastX = x;
-        lastY = y;
+
+        lastLookX = touch.clientX;
+        lastLookY = touch.clientY;
+      });
+
+      lookBox.addEventListener('touchend', (e) => {
+        isDragging = false;
+      });
+
+      // Mouse support for testing
+      lookBox.addEventListener('mousedown', (e) => {
+        if (e.button === 0) {
+          lastLookX = e.clientX;
+          lastLookY = e.clientY;
+          isDragging = true;
+        }
       });
 
       lookBox.addEventListener('mousemove', (e) => {
-        const rect = lookBox.getBoundingClientRect();
-        if (e.buttons === 1) {
-          const x = e.clientX - rect.left;
-          const y = e.clientY - rect.top;
-          const dx = (x - lastX) * 0.003;
-          const dy = (y - lastY) * 0.003;
+        if (!isDragging || e.buttons !== 1) return;
 
-          if (G && G.p) {
-            G.p.yaw -= dx;
-            G.p.pitch = Math.max(-1.2, Math.min(1.2, G.p.pitch - dy));
-          }
-          lastX = x;
-          lastY = y;
+        const dx = (e.clientX - lastLookX) * 0.003;
+        const dy = (e.clientY - lastLookY) * 0.003;
+
+        if (G && G.p) {
+          G.p.yaw -= dx;
+          G.p.pitch = Math.max(-1.2, Math.min(1.2, G.p.pitch - dy));
         }
+
+        lastLookX = e.clientX;
+        lastLookY = e.clientY;
+      });
+
+      lookBox.addEventListener('mouseup', (e) => {
+        isDragging = false;
+      });
+
+      lookBox.addEventListener('mouseleave', (e) => {
+        isDragging = false;
       });
     }
   }
