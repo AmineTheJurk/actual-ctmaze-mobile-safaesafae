@@ -397,8 +397,11 @@ const Multiplayer = (() => {
 
   function executeCatch(targetId, targetRec) {
     if (myRole === 'thief' || S.downed) return;
-    // Only catch thieves, not other monsters
-    if (targetRec.role !== 'thief') return;
+    // CRITICAL: Only catch thieves, NEVER other monsters
+    if (!targetRec || !targetRec.role || targetRec.role !== 'thief') {
+      Game.toast('ERROR: Can only catch thieves!');
+      return;
+    }
 
     send({ type: 'thief_caught', targetId, hunterRole: myRole });
     targetRec.downed = true;
@@ -410,7 +413,8 @@ const Multiplayer = (() => {
 
   function onCatchBtnClick() {
     if (myRole === 'thief' || S.downed) return;
-    if (closestThief && closestThief.d < 2.8) {
+    // CRITICAL: Only allow catch if closestThief exists AND is definitely a thief
+    if (closestThief && closestThief.rec && closestThief.rec.role === 'thief' && closestThief.d < 2.8) {
       executeCatch(closestThief.id, closestThief.rec);
     } else {
       const sound = myRole === 'hurter' ? 'snip' : (myRole === 'puppet' ? 'zap' : 'nazer');
