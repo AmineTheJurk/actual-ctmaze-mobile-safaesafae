@@ -31,9 +31,9 @@ const TouchControls = (() => {
       font-family: 'Alfa Slab One', Georgia, serif;
     `;
 
-    // Full-screen look box (camera control area)
+    // Full-screen look box (camera control area) - excludes bottom HUD and control areas
     const lookBox = `
-      <div style="position: fixed; inset: 0; pointer-events: auto; z-index: 1;" id="lookBox"></div>
+      <div style="position: fixed; top: 0; left: 0; right: 0; bottom: calc(140px + env(safe-area-inset-bottom, 0px)); pointer-events: auto; z-index: 1;" id="lookBox"></div>
     `;
 
     // D-Pad (left side - compact cross layout)
