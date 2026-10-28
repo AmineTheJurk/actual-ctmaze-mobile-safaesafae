@@ -42,18 +42,8 @@ const Multiplayer = (() => {
       return 'ws://localhost:8765';
     }
 
-    // 4. Fall back to current origin if running normally
-    if (typeof window !== 'undefined' && window.location.protocol === 'https:') {
-      return `wss://${window.location.host}`;
-    }
-
-    // 5. Default to localhost for testing
-    if (typeof window !== 'undefined' && (window.location.protocol === 'file:' || !window.location.host)) {
-      return 'ws://localhost:3000';
-    }
-
-    const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    return `${proto}//${window.location.host}`;
+    // 4. Use dedicated Render multiplayer server
+    return 'wss://corn-thief-multiplayer.onrender.com';
   }
 
   function connect() {
