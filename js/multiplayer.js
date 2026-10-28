@@ -624,16 +624,17 @@ const Multiplayer = (() => {
 
     // Check if any player is a thief - if not, spawn AI thief for monsters to hunt
     const hasThief = msg.players && msg.players.some(p => p.role === 'thief');
-    if (!hasThief) {
-      // Spawn AI thief at start position
+    if (!hasThief && room && room.mode) {
+      // Spawn AI thief at thief starting position
+      const startPos = World.randomOpen(G.p, 20);
       const thiefRec = {
         id: 'ai_thief',
         name: 'CPU Thief',
         role: 'thief',
-        x: 0,
-        z: 0,
-        currentX: 0,
-        currentZ: 0,
+        x: startPos.x,
+        z: startPos.z,
+        currentX: startPos.x,
+        currentZ: startPos.z,
         yaw: 0,
         pitch: 0,
         downed: false,
@@ -641,7 +642,7 @@ const Multiplayer = (() => {
         group: new THREE.Group(),
         sp: new THREE.Sprite()
       };
-      thiefRec.sp.position.set(0, 2, 0);
+      thiefRec.sp.position.set(startPos.x, 2, startPos.z);
       thiefRec.group.add(thiefRec.sp);
       G.scene.add(thiefRec.group);
       remotePlayers.set('ai_thief', thiefRec);

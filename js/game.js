@@ -465,7 +465,16 @@ const Game = (() => {
     if (S.loop) S.loop.stop(); S.loop = null; if (S.loopDark) S.loopDark.stop(); S.loopDark = null; Snd.setEcho(false);
     grap = null; hudKey = '';
     info = World.build(scene, seed); Flood.reset(scene);
-    G.p.x = info.start.x; G.p.z = info.start.z; G.p.yaw = -Math.PI / 2 * 0 + Math.PI; G.p.pitch = 0;
+
+    // Set spawn position - monsters spawn at different locations than thief
+    const isMonster = typeof Multiplayer !== 'undefined' && Multiplayer.inMultiplayer && Multiplayer.myRole !== 'thief';
+    let spawnPos = info.start;
+    if (isMonster) {
+      // Monsters spawn at opposite corner of the map
+      spawnPos = World.randomOpen(info.start, 60);
+    }
+
+    G.p.x = spawnPos.x; G.p.z = spawnPos.z; G.p.yaw = -Math.PI / 2 * 0 + Math.PI; G.p.pitch = 0;
     // face the first open direction
     for (const a of [0, Math.PI / 2, Math.PI, -Math.PI / 2]) if (World.rayDist(G.p.x, G.p.z, -Math.sin(a), -Math.cos(a), 12) > 6) { G.p.yaw = a; break; }
     AI.init(info.start); mmInit();
