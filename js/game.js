@@ -544,7 +544,15 @@ const Game = (() => {
       if (document.pointerLockElement === canvas) { lockWorked = true; setPaused(false); }
       else if (lockWorked && S.state === 'play') { setPaused(true); for (const k in keys) keys[k] = false; }
     });
-    $('pause').addEventListener('click', () => { lock(); setPaused(false); });
+    $('pause').addEventListener('click', () => {
+      lock();
+      // Always force unpause after delay to handle pointer lock failures
+      setTimeout(() => {
+        paused = false;
+        for (const k in keys) keys[k] = false;  // Clear stuck keys
+        $('pause').hidden = true;
+      }, 75);
+    });
     $('start').addEventListener('click', () => {
       if (typeof Multiplayer !== 'undefined') Multiplayer.showModeSelect();
     });
